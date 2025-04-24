@@ -2,34 +2,30 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'susindraa/node-docker-api:latest'
-        REMOTE_SERVER = 'your-server-ip'  // IP of your remote server
-        REMOTE_USER = 'your-ssh-username' // SSH username
-        SSH_KEY = credentials('your-ssh-key') // Jenkins credentials ID for SSH private key
+        DOCKER_IMAGE   = 'susindraa/node-docker-api:latest'
+        REMOTE_SERVER  = '192.168.1.37'            // Your server IP (local or public)
+        REMOTE_USER    = 'ubuntu'                 // SSH username (e.g., ubuntu, ec2-user, root)
+        SSH_KEY        = credentials('jenk-deploy-key') // Jenkins credentials ID for SSH private key
+        DOCKERHUB_CREDS = 'dockerhub-credentials-id'    // Jenkins credentials ID for Docker Hub
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                // If you need to pull from a Git repository, use this
-                git 'https://your-repository-url.git'
+                git 'https://github.com/susindraa/24-node-docker-api.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    // Build Docker image (if you haven't built it before)
-                    sh 'docker build -t $DOCKER_IMAGE .'
-                }
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub (make sure to add Docker credentials in Jenkins)
-                    docker.withRegistry('', 'dockerhub-credentials-id') {
+                    docker.withRegistry('', DOCKERHUB_CREDS) {
                         sh 'docker push $DOCKER_IMAGE'
                     }
                 }
@@ -39,13 +35,12 @@ pipeline {
         stage('Deploy to Remote Server') {
             steps {
                 script {
-                    // Deploy the image on remote server via SSH
                     sshagent([SSH_KEY]) {
                         sh """
-                            ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_SERVER << EOF
+                            ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_SERVER << 'EOF'
                                 docker pull $DOCKER_IMAGE
-                                docker stop $(docker ps -q --filter "name=node-docker-api") || true
-                                docker rm $(docker ps -aq --filter "name=node-docker-api") || true
+                                docker stop \$(docker ps -q --filter "name=node-docker-api") || true
+                                docker rm \$(docker ps -aq --filter "name=node-docker-api") || true
                                 docker run -d --name node-docker-api -p 80:3000 $DOCKER_IMAGE
                             EOF
                         """
@@ -57,11 +52,12 @@ pipeline {
 
     post {
         success {
-            echo "Deployment succeeded!"
+            echo "✅ Deployment succeeded!"
         }
         failure {
-            echo "Deployment failed!"
+            echo "❌ Deployment failed!"
         }
     }
 }
+
 

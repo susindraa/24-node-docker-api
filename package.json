@@ -1,0 +1,13 @@
+{
+    "name": "node-docker-api",
+    "version": "1.0.0",
+    "description": "Simple Node API in Docker",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2"
+    }
+  }
+  

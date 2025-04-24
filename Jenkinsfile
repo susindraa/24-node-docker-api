@@ -18,7 +18,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                bat 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', DOCKERHUB_CREDS) {
-                        sh 'docker push $DOCKER_IMAGE'
+                        bat 'docker push $DOCKER_IMAGE'
                     }
                 }
             }
@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     sshagent([SSH_KEY]) {
-                        sh """
+                        bat """
                             ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_SERVER << 'EOF'
                                 docker pull $DOCKER_IMAGE
                                 docker stop \$(docker ps -q --filter "name=node-docker-api") || true

@@ -5,7 +5,7 @@ pipeline {
         DOCKER_IMAGE   = 'susindraa/node-docker-api:latest'
         REMOTE_SERVER  = '192.168.1.37'            // Your server IP (local or public)
         REMOTE_USER    = 'ubuntu'                 // SSH username (e.g., ubuntu, ec2-user, root)
-        SSH_KEY        = credentials('jenk-deploy-key') // Jenkins credentials ID for SSH private key
+        SSH_KEY        = credentials('jenk') // Jenkins credentials ID for SSH private key
         DOCKERHUB_CREDS = 'dockerhub-credentials-id'    // Jenkins credentials ID for Docker Hub
     }
 
